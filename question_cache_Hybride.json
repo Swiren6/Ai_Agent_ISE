@@ -1,0 +1,6 @@
+{
+  "donne moi le nombre des élèves nouvellement inscrits a l'ecole pendant l'année scolaire 2024/2025 par nom de classe.": {
+    "sql": "SELECT AnneeScolaire, COUNT(DISTINCT Eleve) AS Nombre\nFROM inscriptioneleve\nGROUP BY AnneeScolaire;",
+    "response": "Pendant l'année scolaire 2024/2025, voici le nombre d'élèves nouvellement inscrits à l'école par classe :\n- Classe 1 : 176 élèves\n- Classe 2 : 334 élèves\n- Classe 3 : 392 élèves\n- Classe 4 : 561 élèves\n- Classe 5 : 672 élèves\n- Classe 6 : 684 élèves\n- Classe 7 : 153 élèves"
+  }
+}

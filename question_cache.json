@@ -1,0 +1,26 @@
+{
+  "donne moi le nombre des eleves": {
+    "sql": "SELECT COUNT(*) AS Nombre_des_eleves\nFROM eleve;",
+    "response": "Il y a 1367 élèves."
+  },
+  "donne moi le nombre des enseignants": {
+    "sql": "SELECT count(*) AS Nombre_des_enseignants\nFROM bd_eduise2.enseingant;",
+    "response": "Il y a 149 enseignants."
+  },
+  "Quelle est la date de naissance de l'élève avec l'id 1 ?": {
+    "sql": "SELECT DateNaissance\nFROM eleve\nWHERE id = 1;",
+    "response": "L'élève avec l'identifiant 1 est né le 14 août 2007."
+  },
+  "donne moi le nombre des élèves nouvellement inscrits a l'ecole pendant l'année scolaire 2024/2025 par nom de classe.": {
+    "sql": "SELECT c.NOMCLASSEFR AS Classe, COUNT(DISTINCT e.id) AS NombreElevesNouveauxInscrits\nFROM classe c\nJOIN inscriptioneleve i ON c.id = i.Classe\nJOIN anneescolaire a ON i.AnneeScolaire = a.id\nJOIN eleve e ON i.Eleve = e.id\nWHERE a.AnneeScolaire = '2024/2025' AND i.TypeInscri = 'N'\nGROUP BY c.NOMCLASSEFR",
+    "response": "Pendant l'année scolaire 2024/2025, voici le nombre d'élèves nouvellement inscrits à l'école par nom de classe :\n- 1S1 : 8 élèves\n- 1S2 : 5 élèves\n- 1S3 : 7 élèves\n- 2SC1 : 2 élèves\n- 2SC2 : 1 élève\n- 2SC3 : 4 élèves\n- 3M1 : 4 élèves\n- 3M2 : 3 élèves\n- 3SC1 : 6 élèves\n- 3SC2 : 2 élèves\n- 4M1 : 3 élèves\n- 4SC1 : 5 élèves\n- 4SC2 : 11 élèves\n- 7B1 : 32 élèves\n- 7B2 : 30 élèves\n- 7B3 : 29 élèves\n- 7B4 : 29 élèves\n- 8B1 : 1 élève\n- 8B2 : 1 élève\n- 8B3 : 4 élèves\n- 8B4 : 4 élèves\n- 9B1 : 1 élève\n- 9B2 : 5 élèves\n- 9B5 : 1 élève"
+  },
+  "Statistiques des préinscriptions par période": {
+    "sql": "SELECT COUNT(*) AS 'Nombre de préinscriptions', YEAR(`DateNaissance`) AS 'Année de naissance'\nFROM elevepreinscription\nGROUP BY YEAR(`DateNaissance`);",
+    "response": "Le nombre de préinscriptions varie d'une année à l'autre. En 2007, il y a eu le plus grand nombre de préinscriptions avec 172. En 2003, il y a eu 58 préinscriptions, 67 en 2004, 105 en 2005, 83 en 2006, 35 en 2002, 152 en 2008, 2 en 2019, 148 en 2009, 1 en 2020, 202 en 2010, 156 en 2011, 4 en 2022, 3 en 2023, 162 en 2012, 201 en 2013, 2 en 2017, 14 en 2014 et 1 en 2025. Il y a aussi 130 préinscriptions pour lesquelles l'année n'est pas spécifiée."
+  },
+  "donne moi le nombre des élèves nouvellement inscrits a l'ecole pendant l'année scolaire 2024/2025 par nom de classe": {
+    "sql": "SELECT c.NomClasseFr AS Nom_Classe, COUNT(DISTINCT i.Eleve) AS Nombre_Eleves_Nouveaux_Inscrits\nFROM inscriptioneleve i\nJOIN classe c ON i.Classe = c.id\nJOIN anneescolaire a ON i.AnneeScolaire = a.id\nWHERE a.AnneeScolaire = '2024/2025' AND i.TypeInscri = 'N'\nGROUP BY c.NomClasseFr",
+    "response": "Pendant l'année scolaire 2024/2025, voici le nombre d'élèves nouvellement inscrits à l'école par classe :\n- 1S1 : 8 élèves\n- 1S2 : 5 élèves\n- 1S3 : 7 élèves\n- 2SC1 : 2 élèves\n- 2SC2 : 1 élève\n- 2SC3 : 4 élèves\n- 3M1 : 4 élèves\n- 3M2 : 3 élèves\n- 3SC1 : 6 élèves\n- 3SC2 : 2 élèves\n- 4M1 : 3 élèves\n- 4SC1 : 5 élèves\n- 4SC2 : 11 élèves\n- 7B1 : 32 élèves\n- 7B2 : 30 élèves\n- 7B3 : 29 élèves\n- 7B4 : 29 élèves\n- 8B1 : 1 élève\n- 8B2 : 1 élève\n- 8B3 : 4 élèves\n- 8B4 : 4 élèves\n- 9B1 : 1 élève\n- 9B2 : 5 élèves\n- 9B5 : 1 élève"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "donne moi la liste des etudiants inscrit pour l'annee 2025/2026": {
+    "sql": "SELECT e.id, p.NomFr, p.PrenomFr, c.NOMCLASSEFR AS Classe\nFROM inscriptioneleve ie\nJOIN eleve e ON ie.Eleve = e.id\nJOIN personne p ON e.IdPersonne = p.id\nJOIN classe c ON ie.Classe = c.id\nJOIN anneescolaire a ON ie.AnneeScolaire = a.id\nWHERE a.AnneeScolaire = '2025/2026' AND ie.Annuler = 0;",
+    "response": "Voici une liste naturelle d'\u00e9l\u00e8ves avec leurs noms, pr\u00e9noms et classes :\n\n- Mohamed Mhadhbi (4SC1)  \n- Yahya Bouaicha (8B1)  \n- Maryem Teib (4SC1)  \n- Tasnime Teib (2SC1)  \n- Sarra Kerkeni (3SC1)  \n- Abdelaziz Kerkeni (2SC1)  \n- Zeineb Mehrez (9B1)  \n- Adem Bassoumi (3M1)  \n- Aya Abidi (4SC1)  \n- Salma Trabelsi (4SC1)  \n- Khalil Hali (8B1)  \n- Ritej Mathlouthi (9B1)  \n- Dhiaeddine Besghaier (3SC1)  \n- Rayhan Farhat (3SC1)  \n- Kenza Akrout (9B1)  \n- Donia Akrout (2SC1)  \n- Meriem Fares (2SC1)  \n- Youssef Belghith (8B1)  \n- Mohamed Aziz Abdellaoui (2SC1)  \n- Mohamedamine Gam (2SC1)  \n- Malek Gam (8B1)  \n- Riahi Ayoub (4M1)  \n- ... *(et bien d'autres)*  \n\n*(La liste compl\u00e8te inclut tous les \u00e9l\u00e8ves mentionn\u00e9s dans les donn\u00e9es, organis\u00e9s par pr\u00e9nom, nom et classe.)*  \n\nVous souhaitez une analyse sp\u00e9cifique (par classe, ordre alphab\u00e9tique, etc.) ?"
+  },
+  "Combien de tables dans la base?": {
+    "sql": "SELECT COUNT(*) AS nombre_tables \nFROM information_schema.tables \nWHERE table_schema = DATABASE();",
+    "response": "Il semble que les donn\u00e9es fournies ne contiennent pas d'information exploitable pour formuler une r\u00e9ponse. Pourriez-vous pr\u00e9ciser ou compl\u00e9ter votre demande ? Je suis l\u00e0 pour vous aider."
+  },
+  "les statistique de preinscriptions par periode": {
+    "sql": "SELECT \n    DATE_FORMAT(date, '%Y-%m') AS periode,\n    COUNT(*) AS nombre_preinscriptions\nFROM \n    preinscription\nGROUP BY \n    DATE_FORMAT(date, '%Y-%m')\nORDER BY \n    periode;",
+    "response": "Voici une analyse des donn\u00e9es par mois et ann\u00e9e :\n\nOn observe une r\u00e9partition in\u00e9gale avec des pics marqu\u00e9s durant les \u00e9t\u00e9s (juin-juillet) :\n- En 2021 : Juillet domine avec 81 occurrences\n- En 2022 : Juillet \u00e0 nouveau en t\u00eate (108)\n- En 2023 : Juin (100) et juillet (103) tr\u00e8s actifs\n- En 2024 : Mai (70), juin (35) et juillet (88) montrent une forte activit\u00e9\n\nLes mois d'hiver sont g\u00e9n\u00e9ralement plus calmes, avec quelques exceptions comme janvier 2024 (3) et d\u00e9cembre 2024 (2). \n\nL'ann\u00e9e 2022 semble particuli\u00e8rement active dans l'ensemble, tandis que 2021 et 2023 pr\u00e9sentent des profils plus saisonniers. On note aussi quelques occurrences sans date sp\u00e9cifi\u00e9e (159)."
+  },
+  "donne moi le nombre des eleves non reinscrit": {
+    "sql": "SELECT COUNT(DISTINCT e.id) AS nombre_eleves_non_reinscrits\nFROM eleve e\nLEFT JOIN inscriptioneleve ie ON e.id = ie.Eleve AND ie.TypeInscri = 'R'\nWHERE ie.id IS NULL;",
+    "response": "Voici une r\u00e9ponse naturelle en fran\u00e7ais :\n\n\"Le r\u00e9sultat est 486.\"  \n\nOu, si vous pr\u00e9f\u00e9rez une formulation plus compl\u00e8te :  \n\n\"Nous obtenons un total de 486.\"  \n\nSelon le contexte, vous pourriez aussi dire :  \n\"La valeur retourn\u00e9e est 486.\"  \n\nVous pouvez adapter la r\u00e9ponse en fonction de la situation. Par exemple, s'il s'agit d'un calcul ou d'une statistique, vous pourriez pr\u00e9ciser :  \n\"Le nombre total est de 486.\"  \n\nDites-moi si vous souhaitez une formulation plus sp\u00e9cifique !"
+  },
+  "donne moi le nombre de reinscriptions": {
+    "sql": "SELECT COUNT(*) \nFROM inscriptioneleve \nWHERE TypeInscri = 'R';",
+    "response": "Il semble que vous cherchiez des informations li\u00e9es \u00e0 l'ann\u00e9e 1761. Que souhaitez-vous savoir pr\u00e9cis\u00e9ment \u00e0 ce sujet ?"
+  },
+  "donne moi le nombre des classe": {
+    "sql": "SELECT COUNT(*) AS nombre_classes FROM classe;",
+    "response": "Il y a 139 classes."
+  },
+  "donne moi le nombre des classes": {
+    "sql": "SELECT COUNT(*) AS nombre_classes FROM classe;",
+    "response": "Il y a 139 classes."
+  }
+}

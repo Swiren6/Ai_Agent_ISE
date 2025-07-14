@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtualenv
+venv/
+.env/
+.env.local
+
+# Flask
+instance/
+*.db
+
+# Logs
+*.log
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# Ollama models cache (si applicable)
+~/.ollama/
+
+# MySQL dumps
+*.sql
+*.dump
+
+# Notion exports
+*.md
+*.pdf
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+*.egg-info/
+dist/
+build/
+
+# Node (si frontend avancé)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Coverage reports
+htmlcov/
+coverage.xml
+*.cover
+
+# ERD or diagrams auto-generated
+diagrams/
+erd.png
