@@ -8,7 +8,7 @@ from typing import List, Dict
 import tiktoken 
 import json
 from pathlib import Path
-# Charger les variables d'environnement depuis le fichier .env
+from datetime import datetime
 
 load_dotenv()
 
@@ -35,8 +35,8 @@ domain_to_tables_mapping = {
         "personnepreinscription", "preinscription", "preinscriptionpreinscription", "renseignementmedicaux","personne"
     ],
     "SUIVI_SCOLARITE": [
-        "viewabsence", "viewavertissement", "viewblame", "viewgetblame", "viewgetretard",
-        "viewgetretards", "viewretard", "viewstatmoyenneglobal",
+        #"viewabsence", "viewavertissement", "viewblame", "viewgetblame", "viewgetretard",
+        #"viewgetretards", "viewretard", "viewstatmoyenneglobal",
         "dossierscolaire", "eduattestation","edumoymati", "edumoymaticopie", "edumoymatisave", "edunoteelev", "decision", "discipline",
         "eduperiexam", "eduprix", "eduresultat", "eduresultatcopie", "eduresultatcopie11", "edutypeepre","noteeleveview", 
         "justificationeleve", "logsms", "noteseleve", "noteeleveparmatiere", "piecejoint", "retard",
@@ -48,12 +48,12 @@ domain_to_tables_mapping = {
         "personne_archive", "personnepreinscriptionlog", "parent", "parenteleve","personne"
     ],
     "CANTINE": [
-        "viewcantineparjour", "viewcantineparjourenseignant","viewetatcantineparjour",
+        #"viewcantineparjour", "viewcantineparjourenseignant","viewetatcantineparjour",
          "cantine", "menu_cantine", "menu_cantine_jour", "suivicantineparjour",
         "cantineparjour", "cantineparjourenseignant","nvetatcantineparjourglobale",
     ],
     "PERSONNEL_ENSEIGNEMENT": [
-        "viewenseignant", "viewgetmatiereclasseenseignant", "viewmatiereenseignant","viewrepartitionenseignant", "viewrepartitionsurveillant",
+        #"viewenseignant", "viewgetmatiereclasseenseignant", "viewmatiereenseignant","viewrepartitionenseignant", "viewrepartitionsurveillant",
         "educycleens", "edumatiere","teamsteacherrostarview",
         "enseignant_double", "enseignant_motif", "enseignant_paiement", "enseignants_presence", "grade",
         "matiere", "naturematiere", "matiereexamenbloque", "matieresection", "qualite", "personnesupp",
@@ -61,9 +61,9 @@ domain_to_tables_mapping = {
         "enseigantmatiere", "enseingant", "surveillant","personne"
     ],
     "FINANCES_PAIEMENTS": [
-        "viewetatdepaiementuniform", "viewextras", "viewgetclub", "viewgetpaiementextra",
-        "viewgetpaiementscolaire", "viewgetpaiementscolairedetaillee", "viewrchequeecheancier",
-        "viewreglementecheanciernonvalide", "viewtranchepaiement", "viewuniformcommande",
+        #"viewetatdepaiementuniform", "viewextras", "viewgetclub", "viewgetpaiementextra",
+        #"viewgetpaiementscolaire", "viewgetpaiementscolairedetaillee", "viewrchequeecheancier",
+        #"viewreglementecheanciernonvalide", "viewtranchepaiement", "viewuniformcommande",
         "caissemotif", "configuration", "infosfornisseur", "inscriptionelevecourete", "modalite", "banquebordereau",
         "modalitepaiement", "modereglement", "paiementcourete", "paiementmotif", "reglementfornisseur",
         "situationeleve", "banque", "banquebordereaudetails", "banqueversement", "caisse", "caisse_log",
@@ -72,13 +72,13 @@ domain_to_tables_mapping = {
         "uniformcommandedetails", "uniformmodel"
     ],
     "EMPLOIS_DU_TEMPS": [
-        "viewemploi", "viewemploi_enligne", "viewemploiexameneleve", "groupe", "groupecourete",
-        "homeworkclasse", "jour", "periodeexamen", "matiere", "repartitionexamen", "repartitionexamencopie",
+        #"viewemploi", "viewemploi_enligne", "viewemploiexameneleve", 
+        "groupe", "groupecourete","homeworkclasse", "jour", "periodeexamen", "matiere", "repartitionexamen", "repartitionexamencopie",
         "repartitionsemaine", "salle", "seance", "sectioncourete", "semaine", "trimestre", "typepre", "jourfr"
     ],
     "GENERAL_ADMINISTRATION_CONFIG": [
-        "viewcasiervide", "viewgetinscicasier", "viewstatistiquelocalite", "actualite1", "actualites",
-        "anneescolaire", "civilite", "codepostal", "configaffichage", "configmatiereclsstat",
+        #"viewcasiervide", "viewgetinscicasier", "viewstatistiquelocalite",
+        "actualite1", "actualites","anneescolaire", "civilite", "codepostal", "configaffichage", "configmatiereclsstat",
         "configmatierenivstat", "diplome", "dre", "educlasse", "edusection", "eduniveau", "gouvernorat",
         "localite", "extracasier", "extraclub", "extravaucher", "motifdoc", "motifsms", "motiftelechargement",
         "notifications", "notificationcompagne", "pays", "niveau", "privilege", "reclamation", "rubrique",
@@ -90,7 +90,6 @@ domain_to_tables_mapping = {
 }
 
 
-# === Configuration MySQL ===
 mysql_config = {
     'host': os.getenv('MYSQL_HOST'),
     'port': int(os.getenv('MYSQL_PORT', '3306')),
@@ -115,6 +114,39 @@ PROMPT_TEMPLATE = PromptTemplate(
 [SYSTEM] Vous êtes un assistant SQL expert pour une base de données scolaire.
 Votre rôle est de traduire des questions en français en requêtes SQL MySQL.
 
+ATTENTION: 
+1.la trimestre 3 est d id 33, trimestre 2 est d id 32 , trimestre 1 est d id 31.
+2. lorsque on veut avoir l id d un eleve  on fait cette jointure : 
+id_inscription IN (
+        SELECT id
+        FROM inscriptioneleve
+        WHERE Eleve IN (
+            SELECT id
+            FROM eleve
+            WHERE IdPersonne = "numéro de id "
+        )
+3. lorsque on veut savoir l id de la séance on fait la jointure suivante : s.id=e.SeanceDebut  avec s pour la seance et e pour Emploidutemps 
+4.lorsque on demande l etat de paiement on ne mais pas p.Annuler=0 avec p paiement ni CASE
+        WHEN p.Annuler = 1 THEN 'Annulé'
+        ELSE 'Actif'
+    END AS statut_paiement.
+5. lorsque on veut savoir le paiement extra d un eleve on extrait le motif_paiement, le totalTTC  et le reste en faisant  la jointure entre le paiementextra et paiementextradetails d'une coté et paiementextra et paiementmotif d'une autre coté .
+6. lorsque on demande les détails de paiement scolaire on extrait le mode de reglement ,numéro de chèque , montant et la date de l'opération. 
+7.lorsque on demande l'mploi du temps d'un classe précie avec un jour précie on extrait le nom , le prénom de l'enseignant ,le nom de la matière , le nom de la salle , le debut et la fin de séance et le libelle de groupe (par classe...)
+9.Les coordonées de debut et de la fin de séance se trouve dans le table emploidutemps sous forme d'id ,les covertir en heures a l'aide de table seance . 
+10. la semaine A est d'id 2 , la semaine B est d'id 3 , Sans semaine d'id 1.
+11. les colonnes principale  du table personne sont : id, NomFr, PrenomFr, NomAr , PrenomAr, Cin,AdresseFr, AdresseAr,Tel1,Tel2,Nationalite,Localite,Civilite.
+12.pour les nom de jour en français on a une colone libelleJourFr avec mercredi c est ecrite Mercredi . 
+13.utiliser des JOINs explicites . exemple au lieu de :WHERE
+    e.Classe = (SELECT id FROM classe WHERE CODECLASSEFR = '7B2')
+    AND e.Jour = (SELECT id FROM jour WHERE libelleJourFr = 'Mercredi')
+    ecrire:
+ JOIN
+     jour j ON e.Jour = j.id AND j.libelleJourFr = 'Mercredi'
+JOIN
+     classe c ON e.Classe = c.id AND c.CODECLASSEFR = '7B2'
+14. les résultats des trimestres se trouve dans le table Eduresultatcopie .
+15. l id de l eleve est liée par l id de la personne par Idpersonne 
 Voici la structure détaillée des tables pertinentes pour votre tâche (nom des tables, colonnes et leurs types) :
 {{table_info}}
 
@@ -127,108 +159,6 @@ Voici la structure détaillée des tables pertinentes pour votre tâche (nom des
 {{relations}}
 
 ---
-**Informations Clés et Relations Fréquemment Utilisées pour une meilleure performance :**
-Pour optimiser la génération de requêtes et la pertinence, voici un résumé des entités et de leurs liens principaux :
-
--   **Entités Centrales (Personnes & Inscriptions) :**
-    -   **`personne`**: Contient les informations de base (NomFr, PrenomFr, Cin, Email, Tel1) pour toutes les entités (élèves, parents, enseignants, utilisateurs, surveillants).
-        -   Lié à : `eleve.IdPersonne`, `parent.Personne`, `enseingant.idPersonne`, `utilisateur.Personne`, `surveillant.idPersonne`, `renseignementmedicaux.idPersonne`.
-    -   **`eleve`**: Informations spécifiques à l'élève.
-        -   Lié à : `personne.id` via `IdPersonne`, `renseignementmedicaux.idEleve`.
-    -   **`inscriptioneleve`**: **Table principale pour les inscriptions des élèves.** Relie un `Eleve` à une `Classe` pour une `AnneeScolaire`. La colonne `Annuler`  indique si l'inscription est annulée (1 pour annulé, 0 sinon).
-        -   Lié à : `eleve.id` via `Eleve`, `classe.id` via `Classe`, `anneescolaire.id` via `AnneeScolaire`.
-    -   **`parent`**: Informations sur les parents  lié à : `personne.id` via `Personne`.
-    -   **`parenteleve`**: Table de liaison entre `parent` et `eleve` pour définir la relation parent-enfant (ex: Type='Pere', 'Mere').
-
--   **Structure Scolaire :**
-    -   **`anneescolaire`**: Gère les années scolaires. La colonne `AnneeScolaire`  stocke l'année au format 'YYYY/YYYY' (ex: '2023/2024').tu peut accepter la format `YYYY-YYYY` ou `YYYY/YYYY` .
-    -   **`classe`**: Définit les classes (groupes d'élèves).
-        -   Lié à : `anneescolaire.id` via `ID_ANNEE_SCO`, `niveau.id` via `IDNIV`, `etablissement.id` via `CODEETAB`. Contient des noms de classe comme `NOMCLASSEFR`.
-    -   **`niveau`**: Contient les niveaux scolaires (ex: "4ème").
-        -   **Important : Le nom du niveau est stocké dans la colonne NOMNIVFR de la table `niveau` .**
-        -   Lié à : `classe.id` via `IDNIV`, `section.IdNiv`.
-    -   **`section`**: Définit les sections au sein des niveaux (ex: "4 ème Maths", "2 ème Sciences").
-        -   Lié à : `niveau.id` via `IdNiv`.
-    -   **`etablissement`**: Gère les établissements scolaires.
-    -   **`jourfr`**: Table des jours, utile pour les plannings ou les disponibilités.
-
--   **Personnel & Matières :**
-    -   **`enseingant`**: Informations sur les enseignants, lié à `personne` via `idPersonne`.
-    -   **`enseigantmatiere`**: Associe les enseignants aux matières pour une année scolaire.
-    -   **`disponibiliteenseignant`**: Gère les plages de disponibilité des enseignants.
-    -   **`surveillant`**: Informations sur les surveillants, lié à `personne` via `idPersonne`.
-    -   **`utilisateur`**: Gère les utilisateurs du système, lié à `personne` via `Personne` (implicite si `personne.id` est utilisé pour `utilisateur.id`).
-
--   **Incidents & Suivi des Élèves :**
-    -   **`absence`**, **`avertissement`**, **`blame`**: Ces tables enregistrent différents types d'incidents/comportements. Elles sont toutes liées à `inscriptioneleve.id` via leur colonne `Inscription` et souvent à `Enseignant` et `Matiere`.
-    -   **`renseignementmedicaux`**: Contient des informations médicales détaillées pour une `personne` ou un `eleve`.
-
--   **Gestion Administrative/Financière :**
-    -   **`banque`**: Informations sur les banques, liées à `localite` et `personne`.
-    -   **`banquebordereaudetails`**, **`banqueversement`**: Tables liées aux bordereaux et versements bancaires.
-    -   **`caisse`**, **`caisse_log`**, **`caissedetails`**: Gèrent les opérations de caisse et les logs associés, liées à `utilisateur` et `personne`, ainsi qu'où règlements et versements.
-    -   **`cantineparjour`**, **`cantineparjourenseignant`**: Gèrent les paiements de cantine pour élèves et enseignants.
-    -   **`modalitetranche`**: Définit les modalités de paiement et les tranches tarifaires (HT, TTC, TVA, Remise) pour chaque `Modalite` et `AnneeScolaire`.
-    -   **`paiement`**: Enregistre les paiements scolaires principaux (lié à `inscriptioneleve` et `paiementmotif`). Contient le `MontantRestant` et si le paiement est `Annuler`.
-    -   **`paiementdetailscourete`**: Détails des paiements pour des cours d'été (lié à `paiementcourete`, non détaillé ici).
-    -   **`paiementextra`**: Enregistre les paiements pour des activités extrascolaires (clubs, casiers, etc.). Lié à `inscriptioneleve`, `paiementmotif`, `personne`, `anneescolaire`, `classe`, `modalite`.
-    -   **`paiementextradetails`**: Détails spécifiques des paiements extrascolaires.
-    -   **`reglementeleve`**: Enregistre les règlements effectués par les élèves (ou leurs parents), lié à `modereglement`, `paiement`, `paiementextra` et `personne`. Contient les détails du mode de paiement (`NumCheque`, `Proprietaire`, `Banque`), l'état d'annulation (`Annule`), et le type de règlement (`TypeReglement`).
-    -   **`reglementeleve_echeancier`**: Gère les échéanciers de paiement pour les règlements des élèves.
-
--   **Pré-inscription :**
-    -   **`personnepreinscription`**: Informations de base pour les personnes en phase de pré-inscription, similaire à `personne` mais pour le processus de pré-inscription.
-    -   **`preinscription`**: Enregistre les demandes de pré-inscription des élèves. Contient les détails de l'élève, l'établissement, le niveau et la section souhaités et précédents, les moyennes scolaires et la décision finale.
-        -   Lié à : `eleve.id` via `Eleve`, `personne.id` via `Personne`, `niveau.id` via `Niveau` et `NiveauPrecedent`, `section.id` via `Section` et `SectionPrecedent`.
-    -   **`preinscriptionpreinscription`**: Semble être une duplication ou une table liée à `preinscription` avec un nom similaire, il est important de noter sa dépendance à `personnepreinscription` et `elevepreinscription`.
-    -   **`fichierpreinscriptionpreinscription`**: Contient les fichiers associés aux pré-inscriptions.
-    -   ** Si un éleve est nouvellement  inscris a l'ecole  alors TypeInscris est 'N' si il va faire un renouvellement a son inscris alors TypeInscris='R'.
-
--   **Gestion des Uniformes :**
-    -   **`uniformcommandedetails`**: Détails des articles commandés pour les uniformes.
-        -   Lié à : `uniformcommande.id`, `uniformmodel.id`, `uniformtaille.id` , `uniformcouleur.id`.
-    -   **`uniformmodel`**: Définit les modèles d'uniformes (ex: "chemise", "pantalon") Lié à : `uniformgenre.id` .
-
--   **Privilèges et Fonctionnalités :**
-    -   **`actionfonctionalitepriv`**: Actions associées aux fonctionnalités privilégiées.
-    -   **`fonctionaliteprivelge`**: Définit les fonctionnalités privilégiées.
-
-    **Utilisation des Fonctions d'Agrégation et de DISTINCT :**
-+
-+Les fonctions d'agrégation sont utilisées pour effectuer des calculs sur un ensemble de lignes et retourner une seule valeur.
-
- -   **`COUNT(colonne)`**: Compte le nombre de lignes (ou de valeurs non NULL dans une colonne).
-     -   **`COUNT(*)`**: Compte toutes les lignes, y compris celles avec des valeurs NULL.
-     -   **`COUNT(colonne)`**: Compte les lignes où `colonne` n'est pas NULL.
-     -   **`COUNT(DISTINCT colonne)`**: Compte le nombre de **valeurs uniques** (distinctes) dans une colonne. **Utilisez `DISTINCT` avec `COUNT` lorsque la question demande le nombre de choses *différentes* ou *uniques* (par exemple, "nombre d'élèves", "nombre de matières distinctes").**
- -   **`SUM(colonne)`**: Calcule la somme totale des valeurs numériques d'une colonne.
- -   **`AVG(colonne)`**: Calcule la moyenne des valeurs numériques d'une colonne.
- -   **`MAX(colonne)`**: Trouve la valeur maximale dans une colonne.
- -   **`MIN(colonne)`**: Trouve la valeur minimale dans une colonne.
-
-+**Règles Importantes pour les Agrégations :**
-+-   Si vous utilisez une fonction d'agrégation avec des colonnes non agrégées dans votre `SELECT`, vous devez toujours utiliser une clause `GROUP BY` qui inclut toutes les colonnes non agrégées du `SELECT`.
-+-   Considérez attentivement si `DISTINCT` est nécessaire pour `COUNT` afin d'éviter de compter des doublons (par exemple, un élève inscrit dans plusieurs classes si la requête ne le gère pas via `inscriptioneleve` directement).
-
-+**Lexique et Mappage de Termes Courants :**
-+Le modèle doit être tolérant aux petites fautes de frappe et aux variations de langage. Voici un guide pour mapper les termes courants de l'utilisateur aux éléments de la base de données :
-+
-+-   **"élèves", "étudiants", "effectif", "scolaires"** -> Faire référence principalement à la table `eleve` et potentiellement `inscriptioneleve` pour le contexte d'inscription. Utilisez `eleve.id` pour des décomptes distincts.
-+-   **"moyenne", "score", "résultat"** -> Se référer à `dossierscolaire.moyenne_general` (pour la moyenne générale) ou `edumoymati.Moyenne` (pour la moyenne par matière).
-+-   **"classe de X", "niveau X", "en Xème"** -> Utiliser `classe.NOMCLASSEFR` ou `niveau.NOMNIVFR`. Le nom du niveau est dans `niveau.NOMNIVFR`.
-+-   **"enseignant", "prof", "formateur"** -> Table `enseingant`.
-+-   **"parent", "tuteur légal", "représentant"** -> Table `parent` ou `representantlegal`.
-+-   **"date de naissance", "anniversaire"** -> Colonne `DateNaissance` de la table `personne`.
-+-   **"adresse", "lieu de résidence"** -> Colonnes d'adresse dans la table `personne`.
-+-   **"absences", "retards", "blâmes", "avertissements"** -> Tables `absence`, `retard`, `blame`, `avertissement` respectivement.
-+-   **"paiement", "frais", "scolarité", "règlement"** -> Tables `paiement`, `reglementeleve`, `paiementextra`.
-+-   **"année scolaire", "saison scolaire"** -> Table `anneescolaire`, colonne `AnneeScolaire` (format 'YYYY/YYYY').
-+-   **"matière", "cours", "discipline"** -> Table `matiere`, colonne `NomMatiereFr`.
-+-   **"cantine", "repas"** -> Tables `cantine`, `menu_cantine`, `cantineparjour`.
-+-   **"emplois du temps", "planning des cours"** -> Table `viewemploi`, `repartitionsemaine`.
-+-   **"personnel", "employés"** -> Tables `personne`, `enseingant`, `surveillant`.
-
-
 **Instructions pour la génération SQL :**
 1.  Répondez UNIQUEMENT par une requête SQL MySQL valide et correcte.
 2.  Ne mettez AUCUN texte explicatif ou commentaire avant ou après la requête SQL. La réponse doit être purement la requête.
@@ -244,11 +174,9 @@ Requête SQL :
 
 class SQLAssistant:
     def __init__(self):
-        # Initialisation du client Together avec DeepSeek-V3
         self.llm_client = Together(api_key=os.getenv("TOGETHER_API_KEY"))
         print("✅ LLM DeepSeek-V3 (via Together.ai) initialisé")
         
-        # Initialisation de la base de données
         self.db = SQLDatabase.from_uri(
             f"mysql+mysqlconnector://{mysql_config['user']}:{mysql_config['password']}@{mysql_config['host']}:{mysql_config['port']}/{mysql_config['database']}",
             sample_rows_in_table_info=0,
@@ -256,16 +184,9 @@ class SQLAssistant:
         )
         print("✅ SQLDatabase initialisé avec toutes les tables pour introspection.")
 
-        # Initialisation du tokenizer
-        try:
-            self.enc = tiktoken.encoding_for_model("deepseek-chat")
-        except:
-            print("⚠️ Modèle deepseek-chat non trouvé, utilisation de gpt-3.5-turbo comme fallback")
-            self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
             
-        self.input_cost_per_1k_tokens = 0.0  # Gratuit actuellement
-        self.output_cost_per_1k_tokens = 0.0  # Gratuit actuellement
-        print("💰 Coût par 1K tokens (Input/Output) : $0.0 (gratuit)")
+        self.input_cost_per_1k_tokens = 0.00125 
+        self.output_cost_per_1k_tokens = 0.00125
         
         # Initialisation du cache
         self.cache_file_path = "question_cache2.json"
@@ -284,14 +205,53 @@ class SQLAssistant:
         except Exception as e:
             print(f"❌ Erreur LLM: {str(e)}")
             return ""
-
-    def load_relations(self, filepath="prompt_relations.txt") -> str:
-        try:
-            with open(filepath, "r", encoding="utf-8") as f:
-                return f.read().strip()
-        except FileNotFoundError:
-            print(f"❌ Fichier de relations non trouvé : {filepath}")
-            return ""
+    
+    def load_relations(self) -> str:
+            return """
+            [Relations principales]          
+        - absence liée à inscriptioneleve.
+        - actionfonctionalitepriv liée à fonctionaliteprivelge.
+        - avertissement liée à inscriptioneleve.
+        - banque liée à localite, personne.
+        - banquebordereaudetails liée à banquebordereau, reglementeleve.
+        - banqueversement liée à banquebordereau.
+        - blame liée à inscriptioneleve.
+        - caisse liée à utilisateur.
+        - caisse_log liée à personne, utilisateur.
+        - caissedetails liée à banqueversement, caisse, cantineparjour, paiementdetailscourete, personne, reglementeleve, utilisateur.
+        - cantineparjour liée à utilisateur.
+        - cantineparjourenseignant liée à utilisateur.
+        - classe liée à etablissement, niveau.
+        - delegation liée à gouvernorat.
+        - disponibiliteenseignant liée à enseingant, jour.
+        - dre liée à gouvernorat.
+        - eleve liée à personne.
+        - enseigantmatiere liée à anneescolaire, matiere, personne.
+        - enseingant liée à diplome, modalitepaiement, personne, qualite, situationfamilliale.
+        - etablissement liée à dre, gouvernorat, typeetablissement.
+        - fichierpreinscriptionpreinscription liée à preinscriptionpreinscription.
+        - fonctionaliteprivelge liée à rubrique.
+        - inscriptioneleve liée à anneescolaire, personne.
+        - jourfr liée à anneescolaire.
+        - modalitetranche liée à anneescolaire, modalite.
+        - paiement liée à inscriptioneleve, paiementmotif.
+        - paiementdetailscourete liée à paiementcourete.
+        - paiementextra liée à anneescolaire, classe, inscriptioneleve, modalite, paiementmotif, personne.
+        - paiementextradetails liée à paiementextra.
+        - parent liée à personne.
+        - parenteleve liée à eleve, parent.
+        - personne liée à civilite, localite, nationalite.
+        - personnepreinscription liée à civilite, localite.
+        - preinscription liée à eleve, niveau, personne, section.
+        - preinscriptionpreinscription liée à elevepreinscription, niveau, personnepreinscription, section.
+        - reglementeleve liée à modereglement, paiement, paiementextradetails, personne, uniformcommande, utilisateur.
+        - reglementeleve_echeancier liée à modereglement, paiementextradetails, personne, uniformcommande, utilisateur.
+        - renseignementmedicaux liée à eleve, personne.
+        - section liée à niveau.
+        - surveillant liée à diplome, modalitepaiement, personne, qualite, situationfamilliale.
+        - uniformcommandedetails liée à uniformcommande, uniformcouleur, uniformmodel, uniformtaille.
+        - uniformmodel liée à uniformgenre.
+        - utilisateur liée à grade."""
 
     def count_tokens(self, text: str) -> int:
         """Counts tokens for a given text using the encoder."""
@@ -374,25 +334,7 @@ class SQLAssistant:
             # Exécuter la requête avec gestion d'erreur améliorée
             try:
                 result = self.db.run(sql_query)
-                print(f"⚡ Résultat brut de la base de données:\n{result}")  # Debug
-                
-                # Vérification plus robuste des résultats vides
-                if not result or result.strip() == "[]" or (isinstance(result, str) and ("0 rows" in result or "empty" in result.lower())):
-                    # Test avec une requête simplifiée pour vérifier la connexion
-                    test_count = self.db.run("SELECT COUNT(*) FROM eleve;")
-                    print(f"🔎 Test de connexion (nombre d'élèves): {test_count}")
-                    
-                    # Essayer une version alternative de la requête
-                    alt_query = """
-                    SELECT d.LIBELLEDELEGATIONFR AS Delegation, COUNT(e.id) AS NombreEleves
-                    FROM eleve e
-                    JOIN personne p ON e.IdPersonne = p.id
-                    JOIN delegation d ON p.Localite = d.id
-                    GROUP BY d.LIBELLEDELEGATIONFR
-                    ORDER BY NombreEleves DESC;
-                    """
-                    print(f"🔄 Tentative avec requête alternative:\n{alt_query}")
-                    result = self.db.run(alt_query)
+                print(f"⚡ Résultat brut de la base de données:\n{result}")  
                     
             except Exception as db_error:
                 print(f"❌ Erreur DB: {str(db_error)}")
@@ -430,10 +372,6 @@ class SQLAssistant:
                     self.save_cache()
                     
                     return sql_query, formatted, total_cost, total_tokens
-            
-            # Si aucun résultat après tous les essais
-            test_count = self.db.run("SELECT COUNT(*) FROM eleve;")
-            return sql_query, f"Aucune donnée trouvée. (Test: {test_count} élèves existent dans la base)", total_cost, total_tokens
 
         except Exception as e:
             error_msg = f"❌ Erreur système: {str(e)}"
@@ -503,10 +441,6 @@ def main():
 
         print("⏳ Traitement en cours...")
         generated_sql, reponse, total_cost, total_tokens = assistant.ask_question(question)
-        # print(f"💻 SQL généré : {generated_sql}")
-        # print(f"📘 Réponse : {reponse}")
-        # print(f"💲 Coût total de l'interaction : {total_cost:.6f} $")
-        print(f"📝 Total de tokens utilisés : {total_tokens}\n")
         print("-"*50)
 
 if __name__ == "__main__":
